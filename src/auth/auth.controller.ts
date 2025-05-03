@@ -5,6 +5,8 @@ import { UpdateAuthDto } from './dto/update-auth.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import { Response } from 'express';
+import { Auth } from './decorators/auth.decorator';
+import { UserRole } from './interfaces/user-roles.interface';
 
 @Controller('auth')
 export class AuthController {
@@ -34,7 +36,7 @@ export class AuthController {
   }
 
   @Get('users')
-  @UseGuards(AuthGuard())
+  @Auth()
   findAll() {
     return this.authService.findAll();
   }
