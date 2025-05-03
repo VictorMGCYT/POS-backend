@@ -1,5 +1,6 @@
-import { BeforeInsert, Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { UserRole } from "../interfaces/user-roles.interface";
+import { Sales } from "src/sales/entities/sale.entity";
 
 
 @Entity()
@@ -50,6 +51,11 @@ export class Users {
     @DeleteDateColumn()
     deletedAt: Date;
 
+    @OneToMany(
+        () => Sales,
+        (sale) => sale.user
+    )
+    sales: Sales;
 
     @BeforeInsert()
     normalizeData(){
