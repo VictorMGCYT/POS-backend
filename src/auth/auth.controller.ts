@@ -1,17 +1,31 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { LoginAuthDto } from './dto/login-auth.dto';
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  login(@Body() loginAuthDto: LoginAuthDto){
-    return this.authService.login(loginAuthDto);
+  async login(
+    @Body() loginAuthDto: LoginAuthDto,
+    @Res({ passthrough: true}) res: Response
+  ){
+
+    const { token } = await this.authService.login(loginAuthDto);
+
+    res.cookie('jwt', token, {
+      httpOnly: false,
+      secure: false, // Cambiar a true en producción
+      sameSite: 'lax',
+      maxAge: 2 * 60 * 60 * 1000 // 2 horas
+    })
+
+    return { message: 'Login successful' };
   }
 
   @Post('create')

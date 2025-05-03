@@ -6,6 +6,7 @@ import { Repository } from "typeorm";
 import { ConfigService } from "@nestjs/config";
 import { JwtPayload } from "../interfaces/payload.interface";
 import { UnauthorizedException } from "@nestjs/common";
+import { Request } from "express";
 
 
 
@@ -20,7 +21,12 @@ export class JwtStrategy extends PassportStrategy(Strategy){
         const jwtSecret = configService.get<any | undefined>('SECRETJWT_KEY');
 
         super({
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            jwtFromRequest: (req: Request) => {
+                if (req && req.cookies) {
+                  return req.cookies['jwt']; 
+                }
+                return null;
+              },
             secretOrKey: jwtSecret
         })
     }

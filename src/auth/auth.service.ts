@@ -6,13 +6,16 @@ import { Users } from './entities/auth.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { LoginAuthDto } from './dto/login-auth.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
 
   constructor(
     @InjectRepository(Users)
-    private readonly authRepository: Repository<Users> 
+    private readonly authRepository: Repository<Users>,
+
+    private readonly jwtService: JwtService
   ){}
 
   // ** Login del usuario para generar el JWT respectivo a el
@@ -27,7 +30,11 @@ export class AuthService {
       throw new BadRequestException('Password is incorrect');
     }
 
-    const payload = { sub: user.id, username: user.username, role: user.role }; 
+    const payload = { sub: user.id, username: user.username, role: user.role };
+    
+    return {
+      token: this.jwtService.sign(payload)
+    }
 
   }
 
