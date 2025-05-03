@@ -34,8 +34,7 @@ export class Users {
     maternalSurname: string;
 
     @Column({
-        type: 'text',
-        unique: true
+        type: 'text'
     })
     password: string;
 

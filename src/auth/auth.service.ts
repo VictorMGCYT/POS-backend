@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import { JwtService } from '@nestjs/jwt';
+import { PaginationDto } from './dto/pagination.dto';
 
 @Injectable()
 export class AuthService {
@@ -58,21 +59,68 @@ export class AuthService {
     
   }
 
-  async findAll() {
-    // TODO agregar paginacion
-    return await this.authRepository.find();
+  // ** Listar todos los usuarios de la base de datos
+  async findAll( paginationDto: PaginationDto ) {
+    const { limit = 10,  offset = 0} = paginationDto;
+
+    const [data, total] = await this.authRepository.findAndCount({
+      skip: offset,
+      take: limit,
+      select: {
+        id: true,
+        username: true,
+        firstName: true,
+        paternalSurname: true,
+        maternalSurname: true,
+        role: true,
+        createdAt: true,
+      },
+    });
+  
+    return { total, data };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
+  // ** Encontrar un usuario por su ID
+  async findOne(id: string) {
+
+    const user = await this.authRepository.findOneBy({id});
+
+    if(!user){
+      throw new NotFoundException('User not found')
+    }
+
+    const {password, ...rest} = user;
+    return rest;
   }
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
+  // ** Actualizar un usuario por su ID
+  async update(id: string, updateAuthDto: UpdateAuthDto) {
+
+    const user = await this.authRepository.preload({
+      id,
+      ...updateAuthDto
+    });
+
+    if(!user) throw new NotFoundException('User not found');
+
+    try {
+      const updatedUser = await this.authRepository.save(user);
+
+      return updatedUser;
+    } catch (error) {
+      return this.handleError(error);
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+  // ** Eliminar un usuario por su ID (soft delete)
+  async remove(id: string) {
+
+    const user = await this.authRepository.findOneBy({id});
+    if(!user) throw new NotFoundException('User not found');
+
+    await this.authRepository.softDelete({id});
+
+    return `User deleted`;
   }
 
   private handleError(error: any){

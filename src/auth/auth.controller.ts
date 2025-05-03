@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Res, Query, ParseIntPipe, ParseUUIDPipe } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
@@ -7,6 +7,8 @@ import { LoginAuthDto } from './dto/login-auth.dto';
 import { Response } from 'express';
 import { Auth } from './decorators/auth.decorator';
 import { UserRole } from './interfaces/user-roles.interface';
+import { PaginationDto } from './dto/pagination.dto';
+import { Console } from 'console';
 
 @Controller('auth')
 export class AuthController {
@@ -37,22 +39,22 @@ export class AuthController {
 
   @Get('users')
   @Auth()
-  findAll() {
-    return this.authService.findAll();
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.authService.findAll(paginationDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
+  @Get('user/:id')
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.authService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
+  @Patch('update-user/:id')
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateAuthDto: UpdateAuthDto) {
+    return this.authService.update(id, updateAuthDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+  @Delete('detele-user/:id')
+  remove(@Param('id', ParseUUIDPipe) id: string) {
+    return this.authService.remove(id);
   }
 }

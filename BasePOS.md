@@ -76,8 +76,6 @@
 
 ```plaintext
 [users] ---> [sales] ---> [sale_items] ---> [products]
-                        |
-                        ---> [payments]
 ```
 
 ✅ **Notas importantes:**
