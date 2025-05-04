@@ -22,13 +22,13 @@ export class SaleItemsController {
     return this.saleItemsService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSaleItemDto: UpdateSaleItemDto) {
-    return this.saleItemsService.update(+id, updateSaleItemDto);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateSaleItemDto: UpdateSaleItemDto) {
+  //   return this.saleItemsService.update(+id, updateSaleItemDto);
+  // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.saleItemsService.remove(+id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.saleItemsService.remove(+id);
+  // }
 }

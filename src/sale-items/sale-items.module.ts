@@ -9,6 +9,7 @@ import { SaleItems } from './entities/sale-item.entity';
   providers: [SaleItemsService],
   imports: [
     TypeOrmModule.forFeature([SaleItems])
-  ]
+  ],
+  exports: [TypeOrmModule]
 })
 export class SaleItemsModule {}

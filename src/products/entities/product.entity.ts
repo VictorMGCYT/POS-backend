@@ -1,5 +1,5 @@
 import { SaleItems } from "src/sale-items/entities/sale-item.entity";
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 
 @Entity()
@@ -11,7 +11,11 @@ export class Products {
     @Column({ type: 'varchar', length: 255 })
     name: string;
 
-    @Column({ type: 'varchar', length: 100 })
+    @Column({ 
+        type: 'varchar', 
+        length: 100,
+        unique: true, 
+    })
     skuCode: string;
 
     @Column({
@@ -49,5 +53,14 @@ export class Products {
 
     @CreateDateColumn()
     createdAt: Date;
+
+    @DeleteDateColumn()
+    deletedAt: Date;
+
+    @BeforeInsert()
+    normalizeData(){
+        this.name = this.name.trim().replace(/\s+/g, ' ');;
+        this.skuCode = this.skuCode.trim().toLowerCase();
+    }
 
 }
