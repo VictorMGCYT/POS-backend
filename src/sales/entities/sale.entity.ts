@@ -1,5 +1,6 @@
 import { Users } from "src/auth/entities/auth.entity";
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { SaleItems } from '../../sale-items/entities/sale-item.entity';
 
 
 @Entity()
@@ -10,11 +11,16 @@ export class Sales {
 
     @ManyToOne(
         () => Users,
-        (user) => user.sales,
-        { eager: true }
+        (user) => user.sales
     )
     @JoinColumn()
     user: Users;
+
+    @OneToMany(
+        () => SaleItems,
+        (saleItem) => saleItem.sale
+    )
+    saleItems: SaleItems[];
 
     @Column({
         type: 'numeric',
@@ -38,6 +44,6 @@ export class Sales {
     paymentMethod: string;
 
     @CreateDateColumn()
-    sale_date: Date;
+    saleDate: Date;
 
 }

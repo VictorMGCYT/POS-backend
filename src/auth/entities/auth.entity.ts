@@ -55,7 +55,7 @@ export class Users {
         () => Sales,
         (sale) => sale.user
     )
-    sales: Sales;
+    sales: Sales[];
 
     @BeforeInsert()
     normalizeData(){
