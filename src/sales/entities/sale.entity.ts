@@ -13,8 +13,11 @@ export class Sales {
         () => Users,
         (user) => user.sales
     )
-    @JoinColumn()
+    @JoinColumn({ name: 'userId' })
     user: Users;
+
+    @Column()
+    userId: string;
 
     @OneToMany(
         () => SaleItems,

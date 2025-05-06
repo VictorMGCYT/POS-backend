@@ -1,6 +1,6 @@
 import { Products } from "src/products/entities/product.entity";
 import { Sales } from "src/sales/entities/sale.entity";
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 
 @Entity()
@@ -13,13 +13,21 @@ export class SaleItems {
         () => Sales,
         (sale) => sale.saleItems
     )
+    @JoinColumn({ name: 'saleId' }) 
     sale: Sales;
+
+    @Column()
+    saleId: string;
 
     @ManyToOne(
         () => Products,
         (product) => product.saleItems
     )
+    @JoinColumn({ name: 'productId' }) 
     product: Products;
+
+    @Column()
+    productId: string;
 
     @Column({
         type: 'numeric',
