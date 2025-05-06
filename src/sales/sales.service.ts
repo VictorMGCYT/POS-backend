@@ -51,6 +51,8 @@ export class SalesService {
         }
       )
 
+      // TODO verificar que los productos existen y que la cantidad no es mayor al stock
+
       // Hacemos las cuenas de los productos que se vendieron y el total de cada uno
       const productsSales = products.map( (product, index) => {
 
@@ -98,8 +100,29 @@ export class SalesService {
           saleId: sale.id
         }
       });
+
+      // Actualizamos el stock de los productos vendidos
+      const updatedProducts = products.map(product => {
+        const saleItem = saleItems.find(item => item.productId === product.id);
+      
+        if (!saleItem) return product; // por si acaso
+      
+        const newStock = new Decimal(product.stockQuantity).minus(saleItem.quantity);
+      
+        return {
+          ...product,
+          stockQuantity: newStock.toFixed(2), // Actualizamos el stock del producto
+        };
+      });
+      console.log('updatedProducts', updatedProducts);
+      
+      await queryRunner.manager.save(Products, updatedProducts);
       await queryRunner.manager.save(SaleItems, productsSalesWithSaleId);
       await queryRunner.commitTransaction();
+
+      return {
+        message: 'Sale created successfully',
+      }
 
     } catch (error) {
       await queryRunner.rollbackTransaction();
