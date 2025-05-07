@@ -1,9 +1,10 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Products } from './entities/product.entity';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
+import { PaginationDto } from 'src/auth/dto/pagination.dto';
 
 @Injectable()
 export class ProductsService {
@@ -27,12 +28,36 @@ export class ProductsService {
 
   }
 
-  findAll() {
-    return `This action returns all products`;
+  // ** Busqueda y pagonación de los productos
+  async findAll(paginationDto: PaginationDto) {
+    const { limit = 10, offset = 0} = paginationDto;
+    const [products, total] = await this.productsRepository.findAndCount({
+      skip: offset,
+      take: limit
+    })
+
+    if(!products) throw new NotFoundException('Products not found');
+
+    // Crear paginaciones para la respuesta
+    const currentPage = Math.floor(offset / limit) + 1;
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      totalProducts: total,
+      currentPage,
+      totalPages,
+      productsPerPage: limit,
+      products
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  // ** Busqueda de un producto por su id
+  async findOne(id: string) {
+
+    const product = await this.productsRepository.findOneBy({id});
+    if(!product) throw new NotFoundException('Product not found');
+
+    return product;
   }
 
   update(id: number, updateProductDto: UpdateProductDto) {

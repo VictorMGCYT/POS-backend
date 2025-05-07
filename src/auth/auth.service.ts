@@ -77,7 +77,16 @@ export class AuthService {
       },
     });
   
-    return { total, data };
+    const currentPage = Math.floor(offset / limit) + 1;
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      totalItems: total,
+      currentPage,
+      totalPages,
+      itemsPerPage: limit,
+      data,
+    };
   }
 
   // ** Encontrar un usuario por su ID
