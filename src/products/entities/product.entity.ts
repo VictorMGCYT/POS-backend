@@ -1,5 +1,5 @@
 import { SaleItems } from "src/sale-items/entities/sale-item.entity";
-import { BeforeInsert, Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 
 @Entity()
@@ -61,6 +61,12 @@ export class Products {
     normalizeData(){
         this.name = this.name.trim().replace(/\s+/g, ' ');;
         this.skuCode = this.skuCode.trim().toLowerCase();
+    }
+
+    @BeforeUpdate()
+    normalizeUpdateDate(){
+        if(this.name) this.name = this.name.trim().replace(/\s+/g, ' ');
+        if(this.skuCode) this.skuCode = this.skuCode.trim().toLowerCase();
     }
 
 }

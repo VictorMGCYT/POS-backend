@@ -51,8 +51,6 @@ export class SalesService {
         }
       )
 
-      // TODO verificar que los productos existen y que la cantidad no es mayor al stock
-
       products.forEach( product => {
         const saleItem = saleItems.find(item => item.productId === product.id);
         if (!saleItem) return; // por si acaso

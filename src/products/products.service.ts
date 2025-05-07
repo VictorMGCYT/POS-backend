@@ -16,7 +16,7 @@ export class ProductsService {
 
   // ** Creación de un nuevo producto en la base de datos
   async create(createProductDto: CreateProductDto): Promise<string | Products> {
-
+    // TODO validar si el producto está en softDelete
     const product = this.productsRepository.create(createProductDto);
 
     try {
@@ -60,12 +60,26 @@ export class ProductsService {
     return product;
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
+  // ** Actualización de un producto por su id
+  async update(id: string, updateProductDto: UpdateProductDto) {
+
+    const product = await this.findOne(id);
+
+    const productUpdate = this.productsRepository.merge(product, updateProductDto);
+    await this.productsRepository.save(productUpdate);
+
+    return productUpdate;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+  // ** Eliminación de un producto por su id
+  async remove(id: string) {
+    const product = await this.findOne(id);
+    
+    await this.productsRepository.softDelete(id);
+
+    return {
+      message: `El producto ${product.name} ha sido eliminado`,
+    };
   }
 
   // ** Manejo de errores genericos
