@@ -53,6 +53,18 @@ export class SalesService {
 
       // TODO verificar que los productos existen y que la cantidad no es mayor al stock
 
+      products.forEach( product => {
+        const saleItem = saleItems.find(item => item.productId === product.id);
+        if (!saleItem) return; // por si acaso
+
+        const quantity = new Decimal(saleItem.quantity);
+        const stockQuantity = new Decimal(product.stockQuantity);
+
+        if (quantity.greaterThan(stockQuantity)) {
+          throw new BadRequestException(`La cantidad de ${product.name} es mayor al stock`);
+        }
+      })
+
       // Hacemos las cuenas de los productos que se vendieron y el total de cada uno
       const productsSales = products.map( (product, index) => {
 
@@ -114,15 +126,12 @@ export class SalesService {
           stockQuantity: newStock.toFixed(2), // Actualizamos el stock del producto
         };
       });
-      console.log('updatedProducts', updatedProducts);
       
       await queryRunner.manager.save(Products, updatedProducts);
       await queryRunner.manager.save(SaleItems, productsSalesWithSaleId);
       await queryRunner.commitTransaction();
 
-      return {
-        message: 'Sale created successfully',
-      }
+      return sale;
 
     } catch (error) {
       await queryRunner.rollbackTransaction();
