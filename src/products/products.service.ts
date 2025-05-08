@@ -16,7 +16,31 @@ export class ProductsService {
 
   // ** Creación de un nuevo producto en la base de datos
   async create(createProductDto: CreateProductDto): Promise<string | Products> {
-    // TODO validar si el producto está en softDelete
+
+    // Primero revisamos si el producto ya existe en la base de datos
+    const { skuCode } = createProductDto;
+    const productExist = await this.productsRepository.findOne({
+      where: {skuCode: skuCode},
+      withDeleted: true
+    });
+    
+    if (productExist) {
+      if(!productExist.deletedAt){
+        throw new BadRequestException(`El producto con el skuCode ${skuCode} ya existe`);
+      } else{
+        // Si el producto existe pero está eliminado, lo restauramos
+        await this.productsRepository.restore(productExist.id);
+
+        const updateProductExist = this.productsRepository.merge(productExist, createProductDto);
+        updateProductExist.deletedAt = null;
+        await this.productsRepository.save(updateProductExist);
+
+        return updateProductExist;
+      }
+
+    }
+
+    // Si el producto no existe, lo creamos
     const product = this.productsRepository.create(createProductDto);
 
     try {
@@ -64,7 +88,7 @@ export class ProductsService {
   async update(id: string, updateProductDto: UpdateProductDto) {
 
     const product = await this.findOne(id);
-
+    // TODO validar que el producto no tenga skuCode duplicado
     const productUpdate = this.productsRepository.merge(product, updateProductDto);
     await this.productsRepository.save(productUpdate);
 

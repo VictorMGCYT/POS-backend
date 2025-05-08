@@ -55,7 +55,7 @@ export class Products {
     createdAt: Date;
 
     @DeleteDateColumn()
-    deletedAt: Date;
+    deletedAt: Date | null;
 
     @BeforeInsert()
     normalizeData(){
