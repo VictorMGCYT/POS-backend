@@ -1,4 +1,4 @@
-import { BeforeInsert, Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { UserRole } from "../interfaces/user-roles.interface";
 import { Sales } from "src/sales/entities/sale.entity";
 
@@ -49,7 +49,7 @@ export class Users {
     createdAt: Date;
 
     @DeleteDateColumn()
-    deletedAt: Date;
+    deletedAt: Date | null;
 
     @OneToMany(
         () => Sales,
@@ -66,5 +66,13 @@ export class Users {
         if (!this.role) {
             this.role = UserRole.USER
         }
+    }
+
+    @BeforeUpdate()
+    nomalizeDataUpdate(){
+        if(this.username) this.username = this.username.toLowerCase().trim();
+        if(this.firstName) this.firstName = this.firstName.toLowerCase().trim();
+        if(this.paternalSurname) this.paternalSurname = this.paternalSurname.toLowerCase().trim();
+        if(this.maternalSurname) this.maternalSurname = this.maternalSurname.toLowerCase().trim();
     }
 }

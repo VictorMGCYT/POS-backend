@@ -41,11 +41,29 @@ export class AuthService {
 
   // ** Creación de un nuevo usario en la base de datos
   async create(createAuthDto: CreateAuthDto) {
+    // TODO validar si el usuario se encuentra en softDelete
+    const {password, username, ...rest} = createAuthDto;
 
-    const {password, ...rest} = createAuthDto;
+    const userExists = await this.authRepository.findOne({
+      where: {username: username},
+      withDeleted: true
+    });
+
+    if (userExists) {
+      if(!userExists.deletedAt){
+        throw new BadRequestException('User already exists');
+      }else {
+        const userRestored = await this.authRepository.restore(userExists.id);
+
+        const updateUserRestored = this.authRepository.merge(userExists, createAuthDto);
+        updateUserRestored.deletedAt = null;
+        return await this.authRepository.save(updateUserRestored);
+      }
+    }
 
     const user = this.authRepository.create({
       ...rest,
+      username: username.toLowerCase(),
       password: bcrypt.hashSync(password, 10)
     })
 

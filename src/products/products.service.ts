@@ -88,9 +88,12 @@ export class ProductsService {
   async update(id: string, updateProductDto: UpdateProductDto) {
 
     const product = await this.findOne(id);
-    // TODO validar que el producto no tenga skuCode duplicado
     const productUpdate = this.productsRepository.merge(product, updateProductDto);
-    await this.productsRepository.save(productUpdate);
+    try {
+      await this.productsRepository.save(productUpdate);
+    } catch (error) {
+      return this.handleError(error);
+    }
 
     return productUpdate;
   }
