@@ -1,26 +1,43 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSaleItemDto } from './dto/create-sale-item.dto';
 import { UpdateSaleItemDto } from './dto/update-sale-item.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { SaleItems } from './entities/sale-item.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class SaleItemsService {
-  create(createSaleItemDto: CreateSaleItemDto) {
-    return 'This action adds a new saleItem';
+
+  constructor(
+    @InjectRepository(SaleItems)
+    private readonly saleItemsRepository: Repository<SaleItems>
+  ){}
+
+  async findBySaleId(id: string) {
+
+    const queryBuilder = await this.saleItemsRepository.createQueryBuilder('saleItems');
+    const [saleItems, total] = await queryBuilder.leftJoinAndSelect('saleItems.product', 'product')
+      .where('saleItems.saleId = :id', { id })
+      .select([
+        'saleItems.id',
+        'saleItems.saleId',
+        'saleItems.quantity',
+        'saleItems.unitPrice',
+        'saleItems.purchasePrice',
+        'saleItems.subtotal',
+        'saleItems.profit',
+        'product.name',
+        'product.skuCode'
+      ])
+      .getManyAndCount();
+    
+
+    if(total === 0) throw new NotFoundException('Sale not found');
+
+    return {
+      total,
+      saleItems
+    };
   }
 
-  findAll() {
-    return `This action returns all saleItems`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} saleItem`;
-  }
-
-  update(id: number, updateSaleItemDto: UpdateSaleItemDto) {
-    return `This action updates a #${id} saleItem`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} saleItem`;
-  }
 }

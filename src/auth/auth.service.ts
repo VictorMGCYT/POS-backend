@@ -55,8 +55,11 @@ export class AuthService {
       }else {
         const userRestored = await this.authRepository.restore(userExists.id);
 
+        const passwordHash = bcrypt.hashSync(password, 10);
+
         const updateUserRestored = this.authRepository.merge(userExists, createAuthDto);
         updateUserRestored.deletedAt = null;
+        updateUserRestored.password = passwordHash;
         return await this.authRepository.save(updateUserRestored);
       }
     }

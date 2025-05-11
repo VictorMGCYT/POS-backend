@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { UpdateSaleDto } from './dto/update-sale.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -8,6 +8,7 @@ import { SaleItems } from 'src/sale-items/entities/sale-item.entity';
 import { Products } from 'src/products/entities/product.entity';
 import { Users } from 'src/auth/entities/auth.entity';
 import Decimal from 'decimal.js';
+import { PaginationDto } from 'src/auth/dto/pagination.dto';
 
 @Injectable()
 export class SalesService {
@@ -139,19 +140,51 @@ export class SalesService {
 
   }
 
-  findAll() {
-    return `This action returns all sales`;
+  // ** Listar todas las ventas de la base de datos
+  async findAll(paginationDto: PaginationDto) {
+    const { limit = 10, offset = 0} = paginationDto;
+
+    const [sales, total] = await this.salesRepository
+      .createQueryBuilder('sale')
+      .leftJoinAndSelect('sale.user', 'user')
+      .select([
+        'sale.id',
+        'sale.totalAmount',
+        'sale.totalProfit',
+        'sale.paymentMethod',
+        'sale.saleDate',
+        'user.id',
+        'user.username',
+        'user.role'
+      ])
+      .skip(offset)
+      .take(limit)
+      .getManyAndCount();
+
+    if(!sales) throw new NotFoundException('No sales found');
+
+    const currentPage = Math.floor(offset / limit) + 1;
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      totalItems: total,
+      currentPage,
+      totalPages,
+      itemsPerPage: limit,
+      sales,
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} sale`;
+  // ** Encontrar una venta por su ID
+  async findOne(id: string) {
+
+    const sale = await this.salesRepository.findOneBy({id});
+
+    if(!sale) {
+      throw new NotFoundException('Sale not found');
+    }
+
+    return sale;
   }
 
-  update(id: number, updateSaleDto: UpdateSaleDto) {
-    return `This action updates a #${id} sale`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} sale`;
-  }
 }

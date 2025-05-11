@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from '@nestjs/common';
 import { SaleItemsService } from './sale-items.service';
 import { CreateSaleItemDto } from './dto/create-sale-item.dto';
 import { UpdateSaleItemDto } from './dto/update-sale-item.dto';
@@ -7,28 +7,9 @@ import { UpdateSaleItemDto } from './dto/update-sale-item.dto';
 export class SaleItemsController {
   constructor(private readonly saleItemsService: SaleItemsService) {}
 
-  @Post()
-  create(@Body() createSaleItemDto: CreateSaleItemDto) {
-    return this.saleItemsService.create(createSaleItemDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.saleItemsService.findAll();
-  }
-
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.saleItemsService.findOne(+id);
+  findBySaleId(@Param('id', ParseUUIDPipe) id: string) {
+    return this.saleItemsService.findBySaleId(id);
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateSaleItemDto: UpdateSaleItemDto) {
-  //   return this.saleItemsService.update(+id, updateSaleItemDto);
-  // }
-
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.saleItemsService.remove(+id);
-  // }
 }
