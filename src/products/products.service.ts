@@ -4,7 +4,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Products } from './entities/product.entity';
 import { Not, Repository } from 'typeorm';
-import { PaginationDto } from 'src/auth/dto/pagination.dto';
+import { FilterProductsDto } from './dto/filter-products.dto';
 
 @Injectable()
 export class ProductsService {
@@ -52,13 +52,42 @@ export class ProductsService {
 
   }
 
-  // ** Busqueda y pagonación de los productos
-  async findAll(paginationDto: PaginationDto) {
-    const { limit = 10, offset = 0} = paginationDto;
-    const [products, total] = await this.productsRepository.findAndCount({
-      skip: offset,
-      take: limit
-    })
+  // ** Busqueda y paginación de los productos
+  async findAll(filterProductsDto: FilterProductsDto) {
+    const { orderProducts, productsTipe, search, stockOrder, limit = 50, offset = 0 } = filterProductsDto;
+
+    const query = this.productsRepository.createQueryBuilder('product');
+
+    // Filtro por tipo de producto
+    if (productsTipe && productsTipe !== 'all') {
+      const isByWeight = productsTipe === 'weight' ? true : false
+      query.andWhere('product.isByWeight = :isByWeight', { isByWeight: isByWeight });
+    }
+
+    // Búsqueda por nombre
+    if (search) {
+      query.andWhere('LOWER(product.name) LIKE LOWER(:search)', {
+        search: `%${search}%`,
+      });
+    }
+
+    // Ordenamiento por nombre (alfabético)
+    if (orderProducts) {
+      query.orderBy('product.name', orderProducts.toUpperCase() as 'ASC' | 'DESC');
+    }
+
+    // Ordenamiento adicional por stock si se solicita
+    if (stockOrder) {
+      if (!orderProducts) {
+        query.orderBy('product.stockQuantity', stockOrder.toUpperCase() as 'ASC' | 'DESC');
+      } else {
+        query.addOrderBy('product.stockQuantity', stockOrder.toUpperCase() as 'ASC' | 'DESC');
+      }
+    }
+
+    // Paginación
+    query.skip(offset).take(limit);
+    const [products, total] = await query.getManyAndCount();
 
     if(!products) throw new NotFoundException('Products not found');
 

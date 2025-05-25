@@ -5,6 +5,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { Auth } from 'src/auth/decorators/auth.decorator';
 import { UserRole } from 'src/auth/interfaces/user-roles.interface';
 import { PaginationDto } from 'src/auth/dto/pagination.dto';
+import { FilterProductsDto } from './dto/filter-products.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -18,8 +19,8 @@ export class ProductsController {
 
   @Get('get-all')
   @Auth()
-  findAll(@Query() paginationDto: PaginationDto) {
-    return this.productsService.findAll(paginationDto);
+  findAll(@Query() filterProductsDto: FilterProductsDto) {
+    return this.productsService.findAll(filterProductsDto);
   }
 
   @Get('product/:id')
