@@ -66,7 +66,7 @@ export class ProductsService {
 
     // Búsqueda por nombre
     if (search) {
-      query.andWhere('LOWER(product.name) LIKE LOWER(:search)', {
+      query.andWhere('LOWER(product.name) LIKE LOWER(:search) OR LOWER(product.skuCode) LIKE LOWER(:search)', {
         search: `%${search}%`,
       });
     }
@@ -81,7 +81,7 @@ export class ProductsService {
       if (!orderProducts) {
         query.orderBy('product.stockQuantity', stockOrder.toUpperCase() as 'ASC' | 'DESC');
       } else {
-        query.addOrderBy('product.stockQuantity', stockOrder.toUpperCase() as 'ASC' | 'DESC');
+        query.orderBy('product.stockQuantity', stockOrder.toUpperCase() as 'ASC' | 'DESC');
       }
     }
 
