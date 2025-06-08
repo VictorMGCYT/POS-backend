@@ -52,6 +52,8 @@ export class SalesService {
         }
       )
 
+      if(products.length === 0) throw new BadRequestException('Sale must have at least one product');
+
       products.forEach( product => {
         const saleItem = saleItems.find(item => item.productId === product.id);
         if (!saleItem) return; // por si acaso
