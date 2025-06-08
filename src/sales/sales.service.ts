@@ -8,7 +8,7 @@ import { SaleItems } from 'src/sale-items/entities/sale-item.entity';
 import { Products } from 'src/products/entities/product.entity';
 import { Users } from 'src/auth/entities/auth.entity';
 import Decimal from 'decimal.js';
-import { PaginationDto } from 'src/auth/dto/pagination.dto';
+import { PaginationDtoSales } from './dto/paginatio-dto-sale';
 
 @Injectable()
 export class SalesService {
@@ -141,8 +141,11 @@ export class SalesService {
   }
 
   // ** Listar todas las ventas de la base de datos
-  async findAll(paginationDto: PaginationDto) {
-    const { limit = 10, offset = 0} = paginationDto;
+  async findAll(paginationDtoSale: PaginationDtoSales) {
+    const { limit = 50, offset = 0, endDate, startDate} = paginationDtoSale;
+    const today = new Date();
+    const startOfDay = startDate;
+    const endOfDay = endDate;
 
     const [sales, total] = await this.salesRepository
       .createQueryBuilder('sale')
@@ -157,11 +160,41 @@ export class SalesService {
         'user.username',
         'user.role'
       ])
+      .where("sale.saleDate BETWEEN :start AND :end", {
+        start: startOfDay,
+        end: endOfDay,
+      })
       .skip(offset)
       .take(limit)
       .getManyAndCount();
 
-    if(!sales) throw new NotFoundException('No sales found');
+    const resul = await this.salesRepository.createQueryBuilder('sale')
+      .select('COUNT(sale.id)', 'totalSales')
+      .addSelect("SUM(sale.totalAmount)", "totalAmount")
+      .addSelect("SUM(sale.totalProfit)", "totalProfit")
+      .addSelect(
+        `SUM(CASE WHEN sale.paymentMethod = 'Efectivo' THEN sale.totalAmount ELSE 0 END)`,
+        "totalCash"
+      )
+      .addSelect(
+        `SUM(CASE WHEN sale.paymentMethod = 'Tarjeta' THEN sale.totalAmount ELSE 0 END)`,
+        "totalCard"
+      )
+      .addSelect(
+        `COUNT(CASE WHEN sale.paymentMethod = 'Efectivo' THEN 1 END)`,
+        "totalSalesCash"
+      )
+      .addSelect(
+        `COUNT(CASE WHEN sale.paymentMethod = 'Tarjeta' THEN 1 END)`,
+        "totalSalesCard"
+      )
+      .where("sale.saleDate BETWEEN :start AND :end", {
+        start: startOfDay,
+        end: endOfDay,
+      })
+      .getRawOne();
+
+    if(sales.length === 0) throw new NotFoundException('No sales found');
 
     const currentPage = Math.floor(offset / limit) + 1;
     const totalPages = Math.ceil(total / limit);
@@ -171,6 +204,7 @@ export class SalesService {
       currentPage,
       totalPages,
       itemsPerPage: limit,
+      resul,
       sales,
     };
   }

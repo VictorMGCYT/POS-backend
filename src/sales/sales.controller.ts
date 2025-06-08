@@ -3,7 +3,7 @@ import { SalesService } from './sales.service';
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { UpdateSaleDto } from './dto/update-sale.dto';
 import { Auth } from 'src/auth/decorators/auth.decorator';
-import { PaginationDto } from 'src/auth/dto/pagination.dto';
+import { PaginationDtoSales } from './dto/paginatio-dto-sale';
 
 @Controller('sales')
 export class SalesController {
@@ -17,8 +17,8 @@ export class SalesController {
 
   @Get('get')
   @Auth()
-  findAll(@Query() paginationDto: PaginationDto) {
-    return this.salesService.findAll(paginationDto);
+  findAll(@Query() paginationDtoSale: PaginationDtoSales) {
+    return this.salesService.findAll(paginationDtoSale);
   }
 
   @Get('get/:id')
