@@ -145,7 +145,6 @@ export class SalesService {
   // ** Listar todas las ventas de la base de datos
   async findAll(paginationDtoSale: PaginationDtoSales) {
     const { limit = 50, offset = 0, endDate, startDate} = paginationDtoSale;
-    const today = new Date();
     const startOfDay = startDate;
     const endOfDay = endDate;
 

@@ -46,7 +46,7 @@ export class Sales {
     })
     paymentMethod: string;
 
-    @CreateDateColumn()
+    @CreateDateColumn({ type: 'timestamptz' })
     saleDate: Date;
 
 }

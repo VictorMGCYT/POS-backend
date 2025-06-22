@@ -64,6 +64,6 @@ export class SaleItems {
     })
     profit: string;
 
-    @CreateDateColumn()
+    @CreateDateColumn({ type: 'timestamptz' })
     createAt: Date;
 }

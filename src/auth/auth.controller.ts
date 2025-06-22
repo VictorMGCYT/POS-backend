@@ -2,13 +2,11 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Res, Quer
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
-import { AuthGuard } from '@nestjs/passport';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import { Request, Response } from 'express';
 import { Auth } from './decorators/auth.decorator';
 import { UserRole } from './interfaces/user-roles.interface';
 import { PaginationDto } from './dto/pagination.dto';
-import { Console } from 'console';
 import { Users } from './entities/auth.entity';
 import { ApiCookieAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
@@ -96,7 +94,10 @@ export class AuthController {
     return this.authService.findAll(paginationDto);
   }
 
+  // ! Obtener datos de un usuario en especifico
   @Get('user/:id')
+  @Auth()
+  @ApiCookieAuth('jwt')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.authService.findOne(id);
   }
