@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -28,6 +29,16 @@ async function bootstrap() {
     origin: 'http://localhost:5173', // ✅ tu frontend
     credentials: true,               // ✅ permitir cookies
   });
+
+  const config = new DocumentBuilder()
+    .setTitle('Api POS')
+    .setDescription('API del punto de venta')
+    .setVersion('1.0')
+    .addCookieAuth('jwt')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
   
   await app.listen(process.env.PORT ?? 3000);
 }
