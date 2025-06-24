@@ -8,7 +8,7 @@ import { Auth } from './decorators/auth.decorator';
 import { UserRole } from './interfaces/user-roles.interface';
 import { PaginationDto } from './dto/pagination.dto';
 import { Users } from './entities/auth.entity';
-import { ApiCookieAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiCookieAuth, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
@@ -68,8 +68,8 @@ export class AuthController {
   @Auth()
   @ApiCookieAuth('jwt')   
   @ApiOperation({
-    summary: 'Obtener datos de usuario', 
-    description: 'Obtener los datos del usuario que ha inidiado sesión'
+    summary: 'Obtener datos del usuario que se ha logueado', 
+    description: 'Obtener los datos del usuario que ha iniciado sesión'
   })  
   @ApiResponse({status: 200, description: 'Succes: Datos obtenidos correctamente'})
   getUser(@Req() req: Request){
@@ -87,7 +87,7 @@ export class AuthController {
   @ApiCookieAuth('jwt')
   @ApiOperation({
     summary: 'Obtener datos de los usuarios', 
-    description: 'Obtener los datos los usuarios registrados'
+    description: 'Obtener los datos de todos los usuarios registrados'
   }) 
   @ApiResponse({status: 200, description: 'Succes: Datos de usuarios obtenidos correctamente'})
   findAll(@Query() paginationDto: PaginationDto) {
@@ -98,16 +98,50 @@ export class AuthController {
   @Get('user/:id')
   @Auth()
   @ApiCookieAuth('jwt')
+  @ApiOperation({
+    summary: 'Obtener datos un usuario por ID', 
+    description: 'Obtiene los datos de un usuario en específico mediante su ID'
+  }) 
+  @ApiResponse({status: 200, description: 'Succes: Datos de usuario obtenidos correctamente'})
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.authService.findOne(id);
   }
 
+  // ! Editar los datos de un usuario en especifico
   @Patch('update-user/:id')
+  @Auth()
+  @ApiCookieAuth('jwt')
+  @ApiOperation({
+    summary: 'Editar datos de un usuario', 
+    description: 'Campos opcionales para editar la info de algún usuario'
+  }) 
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    description: 'UUID del usuario a editar',
+    example: '2eb1de1b-476f-4371-8dc4-9e208f7f7827',
+  })
+  @ApiResponse({status: 200, description: 'Succes: Se ha editado el usuario correctamente'})
   update(@Param('id', ParseUUIDPipe) id: string, @Body() updateAuthDto: UpdateAuthDto) {
     return this.authService.update(id, updateAuthDto);
   }
 
+  // ! Editar usuario por su ID
   @Delete('detele-user/:id')
+  @Auth()
+  @ApiCookieAuth('jwt')
+  @ApiOperation({
+    summary: 'Borrar usuario', 
+    description: 'Borrar usuario mediante su UUID'
+  }) 
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    description: 'UUID del usuario a editar',
+    example: '2eb1de1b-476f-4371-8dc4-9e208f7f7827',
+  })
+  @ApiResponse({status: 200, description: 'Succes: Se ha eliminado el usuario'})
+  @ApiResponse({status: 404, description: 'Nof Found: Usuario no encontrado'})
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.authService.remove(id);
   }
