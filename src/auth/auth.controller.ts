@@ -8,7 +8,7 @@ import { Auth } from './decorators/auth.decorator';
 import { UserRole } from './interfaces/user-roles.interface';
 import { PaginationDto } from './dto/pagination.dto';
 import { Users } from './entities/auth.entity';
-import { ApiCookieAuth, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiCookieAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
@@ -90,6 +90,8 @@ export class AuthController {
     description: 'Obtener los datos de todos los usuarios registrados'
   }) 
   @ApiResponse({status: 200, description: 'Succes: Datos de usuarios obtenidos correctamente'})
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Cantidad máxima de usuarios a retornar' })
+  @ApiQuery({ name: 'offset', required: false, type: Number, description: 'Cantidad de usuarios a omitir desde el inicio' })
   findAll(@Query() paginationDto: PaginationDto) {
     return this.authService.findAll(paginationDto);
   }

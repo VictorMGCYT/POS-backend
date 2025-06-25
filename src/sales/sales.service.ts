@@ -144,7 +144,7 @@ export class SalesService {
 
   // ** Listar todas las ventas de la base de datos
   async findAll(paginationDtoSale: PaginationDtoSales) {
-    const { limit = 50, offset = 0, endDate, startDate} = paginationDtoSale;
+    const { endDate, startDate} = paginationDtoSale;
     const startOfDay = startDate;
     const endOfDay = endDate;
 
@@ -165,8 +165,6 @@ export class SalesService {
         start: startOfDay,
         end: endOfDay,
       })
-      .skip(offset)
-      .take(limit)
       .getManyAndCount();
 
     const resul = await this.salesRepository.createQueryBuilder('sale')
@@ -197,14 +195,9 @@ export class SalesService {
 
     if(sales.length === 0) throw new NotFoundException('No sales found');
 
-    const currentPage = Math.floor(offset / limit) + 1;
-    const totalPages = Math.ceil(total / limit);
 
     return {
       totalItems: total,
-      currentPage,
-      totalPages,
-      itemsPerPage: limit,
       resul,
       sales,
     };
