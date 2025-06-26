@@ -5,6 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { SalesModule } from './sales/sales.module';
 import { ProductsModule } from './products/products.module';
 import { SaleItemsModule } from './sale-items/sale-items.module';
+import { ReportsModule } from './reports/reports.module';
+import { PrinterModule } from './printer/printer.module';
 
 @Module({
   imports: [
@@ -32,7 +34,13 @@ import { SaleItemsModule } from './sale-items/sale-items.module';
     ProductsModule,
     
     
-    SaleItemsModule
+    SaleItemsModule,
+    
+    
+    ReportsModule,
+    
+    
+    PrinterModule
   ],
   controllers: [],
   providers: [],
