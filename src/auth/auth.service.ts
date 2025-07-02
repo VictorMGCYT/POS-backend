@@ -86,12 +86,8 @@ export class AuthService {
   }
 
   // ** Listar todos los usuarios de la base de datos
-  async findAll( paginationDto: PaginationDto ) {
-    const { limit = 10,  offset = 0} = paginationDto;
-
-    const [data, total] = await this.authRepository.findAndCount({
-      skip: offset,
-      take: limit,
+  async findAll() {
+    const data = await this.authRepository.find({
       select: {
         id: true,
         username: true,
@@ -102,18 +98,10 @@ export class AuthService {
         createdAt: true,
       },
     });
-  
-    const currentPage = Math.floor(offset / limit) + 1;
-    const totalPages = Math.ceil(total / limit);
 
-    return {
-      totalItems: total,
-      currentPage,
-      totalPages,
-      itemsPerPage: limit,
-      data,
-    };
+    return data;
   }
+
 
   // ** Encontrar un usuario por su ID
   async findOne(id: string) {

@@ -90,10 +90,8 @@ export class AuthController {
     description: 'Obtener los datos de todos los usuarios registrados'
   }) 
   @ApiResponse({status: 200, description: 'Succes: Datos de usuarios obtenidos correctamente'})
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Cantidad máxima de usuarios a retornar' })
-  @ApiQuery({ name: 'offset', required: false, type: Number, description: 'Cantidad de usuarios a omitir desde el inicio' })
-  findAll(@Query() paginationDto: PaginationDto) {
-    return this.authService.findAll(paginationDto);
+  findAll() {
+    return this.authService.findAll();
   }
 
   // ! Obtener datos de un usuario en especifico
