@@ -27,7 +27,7 @@ import { JwtStrategy } from './strategy/jwt.strategy';
         return {
           secret: configService.get('SECRETJWT_KEY'),
           signOptions: {
-            expiresIn: '2h'
+            expiresIn: '8h'
           }
         }
       }

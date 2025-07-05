@@ -127,7 +127,7 @@ export class AuthController {
   }
 
   // ! Editar usuario por su ID
-  @Delete('detele-user/:id')
+  @Delete('delete-user/:id')
   @Auth()
   @ApiCookieAuth('jwt')
   @ApiOperation({
