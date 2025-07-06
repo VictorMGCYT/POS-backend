@@ -4,6 +4,8 @@ import { UpdateSaleItemDto } from './dto/update-sale-item.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SaleItems } from './entities/sale-item.entity';
 import { Repository } from 'typeorm';
+import { BestProductsDto } from './dto/best-products.dto';
+import { BestProductResultDto } from './dto/best-products-result.dto';
 
 @Injectable()
 export class SaleItemsService {
@@ -38,6 +40,33 @@ export class SaleItemsService {
       total,
       saleItems
     };
+  }
+
+  async findBestProducts(bestProductsDto: BestProductsDto) {
+
+    const { dayStart, dayEnd } = bestProductsDto;
+
+    const queryBuilder = this.saleItemsRepository.createQueryBuilder('saleItems');
+    const bestProducts = queryBuilder
+      .leftJoin('saleItems.product', 'product')
+      .select([
+        'saleItems.productId',
+        'product.name',
+        'SUM(saleItems.quantity) AS totalQuantity',
+        'SUM(saleItems.subtotal) AS totalSales',
+        'SUM(saleItems.profit) AS totalProfit'
+      ])
+      .where('saleItems.createAt BETWEEN :dayStart AND :dayEnd', {
+        dayStart: dayStart.toISOString(),
+        dayEnd: dayEnd.toISOString()
+      })
+      .groupBy('saleItems.productId, product.name')
+      .orderBy('totalQuantity', 'DESC')
+      .limit(50)
+
+    const products: BestProductResultDto[] = await bestProducts.getRawMany();
+
+    return products;
   }
 
 }

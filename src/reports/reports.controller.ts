@@ -1,20 +1,24 @@
-import { Controller, Get, Res } from '@nestjs/common';
+import { Body, Controller, Get, Res } from '@nestjs/common';
 import { ReportsService } from './reports.service';
 import { Response } from 'express';
 import { ApiOperation } from '@nestjs/swagger';
+import { ReportBestProductsMonthDto } from './dtos/report-best-products-month.dto';
 
 @Controller('reports')
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
-  @Get('daily-report')
+  @Get('best-products')
   @ApiOperation({
-    summary: 'Genera un reporte diario en formato PDF',
-    description: 'Este endpoint genera un reporte diario y lo devuelve como un archivo PDF.'
+    summary: 'Genera un con los 50 productos más vendidos',
+    description: 'Este endpoint genera un reporte en PDF con los 50 productos más vendidos mesualmente.',
   })
-  async getReportPerDay(@Res() res: Response) {
+  async getBestSellingProductsMonth(
+    @Res() res: Response, 
+    @Body() bestProductsDto: ReportBestProductsMonthDto
+  ) {
 
-    const pdfDocument = await this.reportsService.getReportPerDay();
+    const pdfDocument = await this.reportsService.bestSellingProductsMonth(bestProductsDto);
 
     // Colocar los headers necesarios para la descarga del PDF
     res.setHeader('Content-Type', 'application/pdf');

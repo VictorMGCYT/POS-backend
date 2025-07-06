@@ -1,4 +1,4 @@
-import { IsBoolean, IsPositive, IsString, Matches, MaxLength, Min, MinLength } from 'class-validator';
+import { IsBoolean, IsString, Matches, MaxLength, Min, MinLength } from 'class-validator';
 
 
 export class CreateProductDto {
