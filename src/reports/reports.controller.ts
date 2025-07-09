@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Res } from '@nestjs/common';
+import { Body, Controller, Post, Res } from '@nestjs/common';
 import { ReportsService } from './reports.service';
 import { Response } from 'express';
 import { ApiOperation } from '@nestjs/swagger';
@@ -8,7 +8,7 @@ import { ReportBestProductsMonthDto } from './dtos/report-best-products-month.dt
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
-  @Get('best-products')
+  @Post('best-products')
   @ApiOperation({
     summary: 'Genera un con los 50 productos más vendidos',
     description: 'Este endpoint genera un reporte en PDF con los 50 productos más vendidos mesualmente.',
@@ -22,7 +22,7 @@ export class ReportsController {
 
     // Colocar los headers necesarios para la descarga del PDF
     res.setHeader('Content-Type', 'application/pdf');
-    pdfDocument.info.Title = 'Reporte Diario';
+    pdfDocument.info.Title = 'Reporte de Productos Más Vendidos';
     pdfDocument.pipe(res);
     pdfDocument.end();
   }

@@ -30,7 +30,7 @@ export class AuthController {
       httpOnly: true,
       secure: false, // Cambiar a true en producción
       sameSite: 'lax',
-      maxAge: 2 * 60 * 60 * 1000 // 2 horas
+      maxAge: 8 * 60 * 60 * 1000 // 8 horas
     })
 
     return user;

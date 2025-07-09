@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsDate, IsString, MinLength } from "class-validator";
+import { IsDate, IsIn, IsString, MinLength } from "class-validator";
 
 
 export class ReportBestProductsMonthDto {
@@ -11,5 +11,9 @@ export class ReportBestProductsMonthDto {
     @Type(() => Date)
     @IsDate()
     daydate: Date;
+
+    @IsString()
+    @IsIn(['day', 'week', 'month'])
+    period: string;
     
 }

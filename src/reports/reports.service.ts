@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { reportBestProducts } from 'src/assets/reports/report-best-products';
 import { PrinterService } from 'src/printer/printer.service';
 import { ReportBestProductsMonthDto } from './dtos/report-best-products-month.dto';
@@ -15,8 +15,10 @@ export class ReportsService {
     ){}
     
     async bestSellingProductsMonth(bestProductsDto: ReportBestProductsMonthDto){
-        const { username, daydate } = bestProductsDto;
+        const { username, daydate, period } = bestProductsDto;
 
+        let titulo = '';
+        let sbtitulo = '';
         // La fecha viene en zona de méxico o cualquier otra, pero no en UTC.
         const offesetTimezone = daydate.getTimezoneOffset();
         const hoursOffset = offesetTimezone / 60;
@@ -24,10 +26,24 @@ export class ReportsService {
         // Extraer el año, mes y día de la fecha proporcionada
         const year = daydate.getFullYear();
         const month = daydate.getMonth();
+        const day = daydate.getDate();
 
-        // Estas son las fechas para la consulta de la BD
-        const startDateUTC = new Date(Date.UTC(year, month, 1, hoursOffset, 0, 0));
-        const endDateUTC = new Date(Date.UTC(year, month + 1, 1, hoursOffset - 1, 59,59, 999));
+        let startDateUTC: Date;
+        let endDateUTC: Date;
+
+        if(period === 'month'){
+            titulo = 'Reporte de Productos Más Vendidos del Mes';
+            sbtitulo = 'Este reporte muestra los 50 productos más vendidos del mes.';
+            
+            // Para el mes, se toma el primer día del mes y el último día del mes.
+            // Se ajusta la hora a UTC.                   v <- este es el día 1 del mes
+            startDateUTC = new Date(Date.UTC(year, month, 1, hoursOffset, 0, 0));
+            endDateUTC = new Date(Date.UTC(year, month + 1, 1, hoursOffset - 1, 59,59, 999));
+        } else{
+            throw new BadRequestException('Periodo no válido. Debe ser "month", "week" o "day".');
+        }
+
+
 
         const products = await this.saleItemsService.findBestProducts({
             dayStart: startDateUTC,
@@ -37,11 +53,10 @@ export class ReportsService {
         const startLocalDate = formatDate(startDateUTC);
         const endLocalDate = formatDate(endDateUTC);
 
-        console.log(products);
 
         const report = reportBestProducts({
-            title: 'Reporte de Productos Más Vendidos',
-            subtitle: 'Este reporte muestra los 50 productos más vendidos del mes.',
+            title: titulo,
+            subtitle: sbtitulo,
             username: username,
             dayStart: startLocalDate,
             dayEnd: endLocalDate,
