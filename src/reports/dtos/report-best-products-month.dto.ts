@@ -2,7 +2,7 @@ import { Type } from "class-transformer";
 import { IsDate, IsIn, IsString, MinLength } from "class-validator";
 
 
-export class ReportBestProductsMonthDto {
+export class ReportBestProductsDto {
 
     @IsString()
     @MinLength(3)

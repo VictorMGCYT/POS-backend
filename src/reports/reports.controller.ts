@@ -2,7 +2,7 @@ import { Body, Controller, Post, Res } from '@nestjs/common';
 import { ReportsService } from './reports.service';
 import { Response } from 'express';
 import { ApiOperation } from '@nestjs/swagger';
-import { ReportBestProductsMonthDto } from './dtos/report-best-products-month.dto';
+import { ReportBestProductsDto } from './dtos/report-best-products-month.dto';
 
 @Controller('reports')
 export class ReportsController {
@@ -15,10 +15,10 @@ export class ReportsController {
   })
   async getBestSellingProductsMonth(
     @Res() res: Response, 
-    @Body() bestProductsDto: ReportBestProductsMonthDto
+    @Body() bestProductsDto: ReportBestProductsDto
   ) {
 
-    const pdfDocument = await this.reportsService.bestSellingProductsMonth(bestProductsDto);
+    const pdfDocument = await this.reportsService.bestSellingProducts(bestProductsDto);
 
     // Colocar los headers necesarios para la descarga del PDF
     res.setHeader('Content-Type', 'application/pdf');

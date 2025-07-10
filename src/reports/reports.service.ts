@@ -1,9 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { reportBestProducts } from 'src/assets/reports/report-best-products';
 import { PrinterService } from 'src/printer/printer.service';
-import { ReportBestProductsMonthDto } from './dtos/report-best-products-month.dto';
+import { ReportBestProductsDto } from './dtos/report-best-products-month.dto';
 import { formatDate } from 'src/Common/functions/formate-date';
 import { SaleItemsService } from 'src/sale-items/sale-items.service';
+import { AuthService } from 'src/auth/auth.service';
+import { normalizeFullName } from 'src/utils/functions/normalizeString';
 
 @Injectable()
 export class ReportsService {
@@ -11,11 +13,16 @@ export class ReportsService {
     // para poder utilizarlo en la generación de reportes.
     constructor(
         private readonly printerService: PrinterService, 
-        private readonly saleItemsService: SaleItemsService
+        private readonly saleItemsService: SaleItemsService,
+        private readonly authService: AuthService
     ){}
     
-    async bestSellingProductsMonth(bestProductsDto: ReportBestProductsMonthDto){
+    async bestSellingProducts(bestProductsDto: ReportBestProductsDto){
         const { username, daydate, period } = bestProductsDto;
+
+        // Obtener el usuario autenticado
+        const user = await this.authService.findOne(username);
+        const fullName = `${user.firstName} ${user.paternalSurname} ${user.maternalSurname}`;
 
         let titulo = '';
         let sbtitulo = '';
@@ -39,10 +46,30 @@ export class ReportsService {
             // Se ajusta la hora a UTC.                   v <- este es el día 1 del mes
             startDateUTC = new Date(Date.UTC(year, month, 1, hoursOffset, 0, 0));
             endDateUTC = new Date(Date.UTC(year, month + 1, 1, hoursOffset - 1, 59,59, 999));
+        } else if(period === 'week'){
+
+            titulo = 'Reporte de Productos Más Vendidos de la Semana';
+            sbtitulo = 'Este reporte muestra los 50 productos más vendidos de la semana.';
+            
+            // Para la semana, se toma el primer día de la semana (domingo) y el último día de la semana (sábado).
+            const firstDayOfWeek = new Date(year, month, day - daydate.getDay());
+            const lastDayOfWeek = new Date(year, month, day + (6 - daydate.getDay()));
+
+            startDateUTC = new Date(Date.UTC(firstDayOfWeek.getFullYear(), firstDayOfWeek.getMonth(), firstDayOfWeek.getDate(), hoursOffset, 0, 0));
+            endDateUTC = new Date(Date.UTC(lastDayOfWeek.getFullYear(), lastDayOfWeek.getMonth(), lastDayOfWeek.getDate(), hoursOffset - 1, 60, 60, 999));
+
+        } else if(period === 'day'){
+
+            titulo = 'Reporte de Productos Más Vendidos del Día';
+            sbtitulo = 'Este reporte muestra los 50 productos más vendidos del día.';
+            
+            // Para el día, se toma la fecha proporcionada y se ajusta a UTC.
+            startDateUTC = new Date(Date.UTC(year, month, day, hoursOffset, 0, 0));
+            endDateUTC = new Date(Date.UTC(year, month, day + 1, hoursOffset - 1, 59, 59, 999));
+
         } else{
             throw new BadRequestException('Periodo no válido. Debe ser "month", "week" o "day".');
         }
-
 
 
         const products = await this.saleItemsService.findBestProducts({
@@ -53,11 +80,10 @@ export class ReportsService {
         const startLocalDate = formatDate(startDateUTC);
         const endLocalDate = formatDate(endDateUTC);
 
-
         const report = reportBestProducts({
             title: titulo,
             subtitle: sbtitulo,
-            username: username,
+            username: normalizeFullName(fullName),
             dayStart: startLocalDate,
             dayEnd: endLocalDate,
             products: products
