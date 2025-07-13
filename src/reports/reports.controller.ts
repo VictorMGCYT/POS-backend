@@ -7,6 +7,7 @@ import { Auth } from 'src/auth/decorators/auth.decorator';
 import { UserRole } from 'src/auth/interfaces/user-roles.interface';
 import { ReportWorstProductsDto } from './dtos/report-worst-products.dto';
 import { ReportNoSaleProductsDto } from './dtos/report-nosales-products.dto';
+import { StockProductsReportDto } from './dtos/report-stock.dto';
 
 @Controller('reports')
 export class ReportsController {
@@ -70,6 +71,23 @@ export class ReportsController {
     pdfDocument.info.Title = 'Repporte de productos sin ventas'
     pdfDocument.pipe(res);
     pdfDocument.end()
+  }
+
+  @Post('stock')
+  @ApiOperation({
+    summary: "Genera el reporte de todo el sock actual.",
+    description: "Este endpoint genera un PDF del reporte de stock ordenado de mayor a menor"
+  })
+  async getStock(
+    @Res() res: Response,
+    @Body() stockProductsDto: StockProductsReportDto
+  ) {
+    const pdfDocument = await this.reportsService.stockProducts(stockProductsDto);
+
+    res.setHeader("Content-Type", "application/pdf");
+    pdfDocument.info.Title = "Reporte de Stock";
+    pdfDocument.pipe(res);
+    pdfDocument.end();
   }
 
 }

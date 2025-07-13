@@ -10,6 +10,8 @@ import { PrinterService } from 'src/printer/printer.service';
 import { noSaleProductsReport } from 'src/assets/reports/report-products-no-sale';
 import { ReportNoSaleProductsDto } from './dtos/report-nosales-products.dto';
 import { ProductsService } from '../products/products.service';
+import { stockReport } from 'src/assets/reports/report-stock';
+import { StockProductsReportDto } from './dtos/report-stock.dto';
 
 @Injectable()
 export class ReportsService {
@@ -250,4 +252,25 @@ export class ReportsService {
 
         return this.printerService.createPdf(report);
     }
-}
+
+    // ** Método para generar el reporte del stock
+    async stockProducts(stockProductsDto: StockProductsReportDto){
+
+        const {userId, daydate} = stockProductsDto;
+
+         // Obtener el usuario autenticado
+        const user = await this.authService.findOne(userId);
+        const fullName = `${user.firstName} ${user.paternalSurname} ${user.maternalSurname}`;
+
+        const stockProducts = await this.productsService.findStockProducts();
+
+        const document = stockReport({
+            username: normalizeFullName(fullName),
+            dayStart: formatDate(daydate),
+            stockProducts: stockProducts
+        });
+
+        return this.printerService.createPdf(document);
+
+    }
+ }

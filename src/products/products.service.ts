@@ -163,10 +163,24 @@ export class ProductsService {
           .getQuery();
         return 'prod.id NOT IN ' + subQuery;
       })
+      .orderBy('prod.stockQuantity')
       .setParameter('dayStart', dayStart.toISOString())
       .setParameter('dayEnd', dayEnd.toISOString())
       .getRawMany();
 
+    return products;
+
+  }
+
+  // ** Método para obtener el stock de los productos
+  async findStockProducts(){
+
+    const products = await this.productsRepository.find({
+      select: ['name', 'skuCode', 'stockQuantity', 'purchasePrice', 'unitPrice'],
+      order: {
+        stockQuantity: "DESC"
+      }
+    });
     return products;
 
   }
