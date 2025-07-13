@@ -8,7 +8,6 @@ interface HeaderOptions {
 
 export const headerSection = (options: HeaderOptions): Content => {
     const {title, subtitle} = options;
-    console.log(`Titulo: ${title}, Subtítulo: ${subtitle}`);
     return {
         columns: [
             {
@@ -21,14 +20,14 @@ export const headerSection = (options: HeaderOptions): Content => {
                 stack: [
                     {
                         text: title ?? '',
-                        fontSize: 24,
+                        fontSize: 20,
                         bold: true,
                         alignment: 'center',
                         margin: [0, 30, 0, 0]
                     },
                     {
                         text: subtitle ?? '',
-                        fontSize: 12,
+                        fontSize: 14,
                         alignment: 'center',
                         margin: [0, 0, 0, 0]
                     }

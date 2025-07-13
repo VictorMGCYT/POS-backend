@@ -5,6 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Products } from './entities/product.entity';
 import { Not, Repository } from 'typeorm';
 import { FilterProductsDto } from './dto/filter-products.dto';
+import { NoSalesProductsDto } from './dto/no-sales-products.dto';
+import { NoSaleProductResultDto } from './dto/no-sales-products-result.dto';
 
 @Injectable()
 export class ProductsService {
@@ -136,6 +138,37 @@ export class ProductsService {
     return {
       message: `El producto ${product.name} ha sido eliminado`,
     };
+  }
+
+  // ** consulta para obtener los productos sin ventas:
+  async findNoSalesProducts(noSalesProducts: NoSalesProductsDto) {
+    const {dayEnd, dayStart} = noSalesProducts;
+
+    const queryBuilder = this.productsRepository.createQueryBuilder('prod');
+
+    const products: NoSaleProductResultDto[] = await queryBuilder
+      .select([
+        'prod.id', 
+        'prod.name',
+        'prod.stockQuantity',
+        'prod.purchasePrice',
+        'prod.unitPrice'
+      ])
+      .where(qb => {
+        const subQuery = qb
+          .subQuery()
+          .select('si.productId')
+          .from('sale_items', 'si')
+          .where('si.createAt BETWEEN :dayStart AND :dayEnd')
+          .getQuery();
+        return 'prod.id NOT IN ' + subQuery;
+      })
+      .setParameter('dayStart', dayStart.toISOString())
+      .setParameter('dayEnd', dayEnd.toISOString())
+      .getRawMany();
+
+    return products;
+
   }
 
   // ** Manejo de errores genericos

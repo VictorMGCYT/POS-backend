@@ -13,6 +13,6 @@ import { AuthModule } from 'src/auth/auth.module';
 
     AuthModule,
   ],
-  exports: [TypeOrmModule]
+  exports: [TypeOrmModule, ProductsService]
 })
 export class ProductsModule {}
