@@ -50,7 +50,12 @@ export const reportBestAndWorstProducts = (
 
                 // ternario para decidir que mostrar
                 products.length === 0 ?
-                {text: "No hay productos para mostrar", margin: [0, 20, 0, 0], alignment: 'center', bold: true}
+                {
+                    text: "No hay productos para mostrar", 
+                    margin: [0, 20, 0, 0], 
+                    alignment: 'center', 
+                    bold: true
+                }
                 :
                 // ! Tabla de productos
                 {
