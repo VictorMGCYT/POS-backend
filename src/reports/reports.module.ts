@@ -5,10 +5,11 @@ import { PrinterModule } from 'src/printer/printer.module';
 import { SaleItemsModule } from 'src/sale-items/sale-items.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { ProductsModule } from 'src/products/products.module';
+import { SalesModule } from 'src/sales/sales.module';
 
 @Module({
   controllers: [ReportsController],
   providers: [ReportsService],
-  imports: [PrinterModule, SaleItemsModule, AuthModule, ProductsModule]
+  imports: [PrinterModule, SaleItemsModule, AuthModule, ProductsModule, SalesModule]
 })
 export class ReportsModule {}

@@ -8,6 +8,7 @@ import { UserRole } from 'src/auth/interfaces/user-roles.interface';
 import { ReportWorstProductsDto } from './dtos/report-worst-products.dto';
 import { ReportNoSaleProductsDto } from './dtos/report-nosales-products.dto';
 import { StockProductsReportDto } from './dtos/report-stock.dto';
+import { ReportEarnsDto } from './dtos/report-earns.dto';
 
 @Controller('reports')
 export class ReportsController {
@@ -74,6 +75,8 @@ export class ReportsController {
   }
 
   @Post('stock')
+  @Auth( UserRole.ADMIN )
+  @ApiCookieAuth('jwt')
   @ApiOperation({
     summary: "Genera el reporte de todo el sock actual.",
     description: "Este endpoint genera un PDF del reporte de stock ordenado de mayor a menor"
@@ -86,6 +89,23 @@ export class ReportsController {
 
     res.setHeader("Content-Type", "application/pdf");
     pdfDocument.info.Title = "Reporte de Stock";
+    pdfDocument.pipe(res);
+    pdfDocument.end();
+  }
+
+  @Post('earns')
+  @ApiOperation({
+    summary: "Genera el reporte de las ganancias",
+    description: "Este endpoint genera el reporte de las ganancias por día, semana y mes."
+  })
+  async getEarns(
+    @Res() res: Response,
+    @Body() earnsDto: ReportEarnsDto
+  ){
+    const pdfDocument = await this.reportsService.earnsReport(earnsDto);
+
+    res.setHeader("Content-Type", "application/pdf");
+    pdfDocument.info.Title = "Reporte de Ganancias";
     pdfDocument.pipe(res);
     pdfDocument.end();
   }

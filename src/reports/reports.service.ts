@@ -12,6 +12,9 @@ import { ReportNoSaleProductsDto } from './dtos/report-nosales-products.dto';
 import { ProductsService } from '../products/products.service';
 import { stockReport } from 'src/assets/reports/report-stock';
 import { StockProductsReportDto } from './dtos/report-stock.dto';
+import { SalesService } from 'src/sales/sales.service';
+import { ReportEarnsDto } from './dtos/report-earns.dto';
+import { reportEarnsOfSales } from 'src/assets/reports/report-earns';
 
 @Injectable()
 export class ReportsService {
@@ -21,7 +24,8 @@ export class ReportsService {
         private readonly printerService: PrinterService, 
         private readonly saleItemsService: SaleItemsService,
         private readonly authService: AuthService,
-        private readonly productsService: ProductsService
+        private readonly productsService: ProductsService,
+        private readonly salesService: SalesService
     ){}
     
     // ** Método para generar el reporte de los productos más vendidos
@@ -272,5 +276,75 @@ export class ReportsService {
 
         return this.printerService.createPdf(document);
 
+    }
+
+    // ** Método para generar el reporte de ganancias
+    async earnsReport(earnsDto: ReportEarnsDto) {
+        const { userId, daydate, period } = earnsDto;
+
+        // Obtener el usuario autenticado
+        const user = await this.authService.findOne(userId);
+        const fullName = `${user.firstName} ${user.paternalSurname} ${user.maternalSurname}`;
+
+
+        // La fecha viene en zona de méxico o cualquier otra, pero no en UTC.
+        const offesetTimezone = daydate.getTimezoneOffset();
+        const hoursOffset = offesetTimezone / 60;
+        
+        // Extraer el año, mes y día de la fecha proporcionada
+        const year = daydate.getFullYear();
+        const month = daydate.getMonth();
+        const day = daydate.getDate();
+        
+        // variable para los datos del reporte
+        let titulo = '';
+        let sbtitulo = '';
+        let startDateUTC: Date;
+        let endDateUTC: Date;
+        if(period === 'month'){
+            titulo = 'Reporte de Ganancias del Mes';
+            sbtitulo = 'Este reporte muestra las ganancias del mes.';
+            
+            // Para el mes, se toma el primer día del mes y el último día del mes.
+            // Se ajusta la hora a UTC.                   v <- este es el día 1 del mes
+            startDateUTC = new Date(Date.UTC(year, month, 1, hoursOffset, 0, 0));
+            endDateUTC = new Date(Date.UTC(year, month + 1, 1, hoursOffset - 1, 59,59, 999));
+        } else if(period === 'week'){
+
+            titulo = 'Reporte de ganancias de la Semana';
+            sbtitulo = 'Este reporte muestra las ganancias de la semana.';
+            
+            // Para la semana, se toma el primer día de la semana (domingo) y el último día de la semana (sábado).
+            const firstDayOfWeek = new Date(year, month, day - daydate.getDay());
+            const lastDayOfWeek = new Date(year, month, day + (6 - daydate.getDay()));
+
+            startDateUTC = new Date(Date.UTC(firstDayOfWeek.getFullYear(), firstDayOfWeek.getMonth(), firstDayOfWeek.getDate(), hoursOffset, 0, 0));
+            endDateUTC = new Date(Date.UTC(lastDayOfWeek.getFullYear(), lastDayOfWeek.getMonth(), lastDayOfWeek.getDate(), hoursOffset - 1, 60, 60, 999));
+
+        } else if(period === 'day'){
+
+            titulo = 'Reporte de Ganancias del Día';
+            sbtitulo = 'Este reporte muestra las ganancias del día.';
+            
+            // Para el día, se toma la fecha proporcionada y se ajusta a UTC.
+            startDateUTC = new Date(Date.UTC(year, month, day, hoursOffset, 0, 0));
+            endDateUTC = new Date(Date.UTC(year, month, day + 1, hoursOffset - 1, 59, 59, 999));
+
+        } else{
+            throw new BadRequestException('Periodo no válido. Debe ser "month", "week" o "day".');
+        }
+
+        const earns = await this.salesService.getSalesEarns(startDateUTC, endDateUTC);
+
+        const document = reportEarnsOfSales({
+            title: titulo,
+            subtitle: sbtitulo,
+            username: normalizeFullName(fullName),
+            dayStart: formatDate(startDateUTC),
+            dayEnd: formatDate(endDateUTC),
+            earns: earns
+        });
+
+        return this.printerService.createPdf(document);
     }
  }

@@ -18,6 +18,7 @@ import { AuthModule } from 'src/auth/auth.module';
     ProductsModule,
 
     AuthModule
-  ]
+  ],
+  exports: [SalesService]
 })
 export class SalesModule {}

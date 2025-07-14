@@ -9,6 +9,7 @@ import { Products } from 'src/products/entities/product.entity';
 import { Users } from 'src/auth/entities/auth.entity';
 import Decimal from 'decimal.js';
 import { PaginationDtoSales } from './dto/paginatio-dto-sale';
+import { EarnsDto } from './dto/earns.dto';
 
 @Injectable()
 export class SalesService {
@@ -213,6 +214,32 @@ export class SalesService {
     }
 
     return sale;
+  }
+
+  // ** Consulta para traer todos los datos de ganancias de ventas en un rango de fechas
+  async getSalesEarns(startDate: Date, endDate: Date) {
+
+    const salesProfit = this.salesRepository.createQueryBuilder('sale');
+
+    // Ejecutamos la consulta
+    const earns: EarnsDto | undefined = await salesProfit
+      .select(`SUM(CASE WHEN sale.paymentMethod = 'Efectivo' THEN 1 ELSE 0 END)`, 'ventas_efectivo')
+      .addSelect(`SUM(CASE WHEN sale.paymentMethod = 'Tarjeta' THEN 1 ELSE 0 END)`, 'ventas_tarjeta')
+      .addSelect(`COUNT(*)`, 'ventas_totales')
+      .addSelect(`SUM(CASE WHEN sale.paymentMethod = 'Efectivo' THEN sale.totalAmount ELSE 0 END)`, 'monto_en_efectivo')
+      .addSelect(`SUM(CASE WHEN sale.paymentMethod = 'Tarjeta' THEN sale.totalAmount ELSE 0 END)`, 'monto_en_tarjeta')
+      .addSelect(`SUM(sale.totalAmount)`, 'monto_total')
+      .addSelect(`SUM(CASE WHEN sale.paymentMethod = 'Efectivo' THEN sale.totalProfit ELSE 0 END)`, 'ganancia_efectivo')
+      .addSelect(`SUM(CASE WHEN sale.paymentMethod = 'Tarjeta' THEN sale.totalProfit ELSE 0 END)`, 'ganancia_tarjeta')
+      .addSelect(`SUM(sale.totalProfit)`, 'ganancia_total')
+      .where("sale.saleDate BETWEEN :start AND :end", {
+        start: startDate,
+        end: endDate,
+      })
+      .getRawOne();
+    
+    return earns;
+
   }
 
 }

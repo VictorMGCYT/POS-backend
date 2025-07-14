@@ -1,6 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateSaleItemDto } from './dto/create-sale-item.dto';
-import { UpdateSaleItemDto } from './dto/update-sale-item.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SaleItems } from './entities/sale-item.entity';
 import { Repository } from 'typeorm';
@@ -66,7 +64,6 @@ export class SaleItemsService {
       .orderBy('totalQuantity', 'DESC')
       .limit(50)
 
-    console.log(bestProducts.getQuery());
 
     const products: BestProductResultDto[] = await bestProducts.getRawMany();
 
@@ -94,7 +91,6 @@ export class SaleItemsService {
       .orderBy('totalQuantity', 'ASC')
       .limit(50)
 
-    console.log(bestProducts.getQuery());
 
     const products: WorstProductResultDto[] = await bestProducts.getRawMany();
 
