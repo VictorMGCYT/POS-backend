@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ReportBestProductsDto } from './dtos/report-best-products-month.dto';
-import { formatDate } from 'src/Common/functions/formate-date';
+import { formatDate } from 'src/utils/functions/formate-date';
 import { SaleItemsService } from 'src/sale-items/sale-items.service';
 import { AuthService } from 'src/auth/auth.service';
 import { normalizeFullName } from 'src/utils/functions/normalizeString';

@@ -1,6 +1,6 @@
 import { TDocumentDefinitions } from "pdfmake/interfaces";
 import { headerSection } from "./sections/header.section";
-import { formatDate } from "src/Common/functions/formate-date";
+import { formatDate } from "src/utils/functions/formate-date";
 import { BestProductResultDto } from "src/sale-items/dto/best-products-result.dto";
 import { WorstProductResultDto } from "src/sale-items/dto/worst-products-result.dto";
 import { gitHubQr } from "./sections/github-qr.section";
