@@ -4,7 +4,7 @@
 
 # Sistema de Punto de Venta Ventry
 
-Hola, este es backend de un sistema de punto de venta desarrollado con NestJS. El objetivo es proporcionar una solución completa para la gestión de ventas, inventario y clientes.  
+Hola, este es backend de un sistema de punto de venta desarrollado con NestJS. El objetivo es proporcionar una solución completa para la gestión de ventas e inventario.  
 La licencia de este proyecto te permite usarlo de forma gratuita, ya sea para fines personales o educativos. Sin embargo, si deseas utilizarlo con fines comerciales, se requiere una licencia comercial. Para más detalles, contáctame personalmente [manuelvgc2233@gmail.com](mailto:manuelvgc2233@gmail.com), si deseas más información consulta el archivo LICENSE del repositorio.
 
 ### Índice
@@ -14,7 +14,8 @@ La licencia de este proyecto te permite usarlo de forma gratuita, ya sea para fi
 [Módulos del Proyecto](#módulos-del-proyecto)  
 [Carpetas de Recursos](#carpetas-de-recursos)  
 [Manejo de autenticación de usuarios](#manejo-de-autenticación-de-usuarios)  
-[Requisitos](#requisitos)
+[Requisitos](#requisitos)  
+[Estructura de la base de datos](#estructura-de-la-base-de-datos)
 
 ## Requisitos
 El proyecto se ha desarrollado utilizando la siguiente versión de Node.js, para evitar problemas de compatibilidad, asegúrate de tener instalada la misma versión o una superior:
@@ -76,6 +77,63 @@ El flujo de autenticación es el siguiente:
 3. **Acceso a endpoints protegidos**: Los endpoints que se encuentran decorados con `@Auth()` requieren que el usuario envíe el token en las cookies de la solicitus.
 4. **Verificación del token**: El servidor por defecto utiliza la librería `Passport` la cuál establece por defecto una estrategia de autenticación basada en JWT. Esta estrategia verifica la validez del token en cada solicitud a los endpoints protegidos, puedes verlos en el archivo `auth/strategy/jwt.strategy.ts`.
 5. **Colocación del token en la request**: La estrategia valida el token y, si es válido verifica que el usuario que contiene el `payload` del token exista en la base de datos, si es así, permite el acceso al endpoint protegido y además coloca la información del usuario en la request mediante el método `validate` de la estrategia, lo que permite acceder a los datos del usuario autenticado en los controladores.
+
+## Estructura de la base de datos
+
+### 1. **users** (Usuarios del sistema)
+
+| Columna        | Tipo         | Descripción                     |
+|:---------------|:-------------|:---------------------------------|
+| id             | INT PK AUTO_INCREMENT | ID único del usuario. |
+| username       | VARCHAR(100) | Nombre de usuario para login.    |
+| password_hash  | VARCHAR(255) | Contraseña hasheada.             |
+| role           | ENUM('admin', 'cajero') | Rol dentro del sistema. |
+| created_at     | DATETIME     | Fecha de creación.               |
+
+---
+
+### 2. **products** (Productos disponibles)
+
+| Columna        | Tipo          | Descripción                         |
+|:---------------|:--------------|:------------------------------------|
+| id             | INT PK AUTO_INCREMENT | ID único del producto.        |
+| name           | VARCHAR(255)  | Nombre del producto.                |
+| sku_code       | VARCHAR(100) NULL | Código de barras o SKU (opcional para frutas/verduras). |
+| is_by_weight   | BOOLEAN       | TRUE si se vende por peso, FALSE si es por unidad. |
+| unit_price     | DECIMAL(10,2) | Precio de venta **actual** (por unidad o por kilo). |
+| purchase_price | DECIMAL(10,2) | Precio de compra actual (por unidad o por kilo). |
+| stock_quantity | DECIMAL(10,2) | Stock disponible (puede ser decimal para kilos). |
+| created_at     | DATETIME      | Fecha de creación.                  |
+
+---
+
+### 3. **sales** (Ventas realizadas)
+
+| Columna        | Tipo           | Descripción                       |
+|:---------------|:---------------|:----------------------------------|
+| id             | INT PK AUTO_INCREMENT | ID único de venta.           |
+| user_id        | INT FK → users(id) | Usuario que hizo la venta.    |
+| total_amount   | DECIMAL(10,2)   | Total de la venta.               |
+| total_profit   | DECIMAL(10,2)   | Total de la **ganancia** generada en esta venta. |
+| payment_method | ENUM('efectivo', 'tarjeta', 'transferencia') | Método de pago usado. |
+| sale_date      | DATETIME        | Fecha y hora de la venta.         |
+
+---
+
+### 4. **sale_items** (Productos vendidos en cada venta)
+
+| Columna         | Tipo          | Descripción                        |
+|:----------------|:--------------|:-----------------------------------|
+| id              | INT PK AUTO_INCREMENT | ID único del item.            |
+| sale_id         | INT FK → sales(id) | Venta a la que pertenece.      |
+| product_id      | INT FK → products(id) | Producto vendido.             |
+| quantity        | DECIMAL(10,2) | Cantidad vendida (piezas o kilos). |
+| unit_price      | DECIMAL(10,2) | Precio de venta al momento.         |
+| purchase_price  | DECIMAL(10,2) | Precio de compra al momento.        |
+| subtotal        | DECIMAL(10,2) | quantity * unit_price (antes de descuentos si tuvieras). |
+| profit          | DECIMAL(10,2) | (unit_price - purchase_price) * quantity |
+
+
 
  
 ## Documentation
