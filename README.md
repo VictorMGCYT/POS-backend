@@ -133,12 +133,10 @@ El flujo de autenticación es el siguiente:
 | subtotal        | DECIMAL(10,2) | quantity * unit_price (antes de descuentos si tuvieras). |
 | profit          | DECIMAL(10,2) | (unit_price - purchase_price) * quantity |
 
-
-
  
 ## Documentation
 
-Hello, this is the backend of a point of sale system developed with NestJS. The goal is to provide a complete solution for managing sales, inventory, and customers.
+Hello, this is the backend of a point of sale system developed with NestJS. The goal is to provide a complete solution for managing sales and inventory.
 The license of this project allows you to use it for free, either for personal or educational purposes. However, if you want to use it for commercial purposes, a commercial license is required. For more details, contact me personally at manuelvgc2233@gmail.com. For more information, check the LICENSE file in the repository.
 
 ### Index
@@ -148,7 +146,8 @@ The license of this project allows you to use it for free, either for personal o
 [Project Modules](#project-modules)  
 [Resource Folders](#resource-folders)  
 [User Authentication Management](#user-authentication-management)  
-[Requirements](#requirements)
+[Requirements](#requirements)  
+[Database structure](#database-structure)
 
 ## Requirements
 This project was developed using the following Node.js version. To avoid compatibility issues, make sure you have the same or a higher version installed:
@@ -210,3 +209,58 @@ The authentication flow is as follows:
 3. **Access to protected endpoints**: Endpoints decorated with `@Auth()` require the user to send the token in the request cookies.
 4. **Token verification**: By default, the server uses the `Passport` library, which sets a JWT-based authentication strategy. This strategy verifies the token's validity on each request to protected endpoints. You can see it in the `auth/strategy/jwt.strategy.ts` file.
 5. **Placing the token in the request**: The strategy validates the token and, if valid, checks that the user contained in the token's payload exists in the database. If so, it allows access to the protected endpoint and also places the user information in the request via the strategy's `validate` method, allowing access to the authenticated user's data in the controllers.
+
+## Database Structure
+
+### 1. **users** (System users)
+
+| Column         | Type                   | Description                        |
+|:-------------- |:----------------------|:-----------------------------------|
+| id             | INT PK AUTO_INCREMENT  | Unique user ID.                    |
+| username       | VARCHAR(100)           | Username for login.                |
+| password_hash  | VARCHAR(255)           | Hashed password.                   |
+| role           | ENUM('admin', 'cashier') | Role within the system.           |
+| created_at     | DATETIME               | Creation date.                     |
+
+---
+
+### 2. **products** (Available products)
+
+| Column         | Type                   | Description                                              |
+|:-------------- |:----------------------|:---------------------------------------------------------|
+| id             | INT PK AUTO_INCREMENT  | Unique product ID.                                       |
+| name           | VARCHAR(255)           | Product name.                                            |
+| sku_code       | VARCHAR(100) NULL      | Barcode or SKU (optional for fruits/vegetables).         |
+| is_by_weight   | BOOLEAN                | TRUE if sold by weight, FALSE if by unit.                |
+| unit_price     | DECIMAL(10,2)          | **Current** sale price (per unit or per kilo).           |
+| purchase_price | DECIMAL(10,2)          | Current purchase price (per unit or per kilo).           |
+| stock_quantity | DECIMAL(10,2)          | Available stock (can be decimal for kilos).              |
+| created_at     | DATETIME               | Creation date.                                           |
+
+---
+
+### 3. **sales** (Completed sales)
+
+| Column         | Type                   | Description                                    |
+|:-------------- |:----------------------|:-----------------------------------------------|
+| id             | INT PK AUTO_INCREMENT  | Unique sale ID.                                |
+| user_id        | INT FK → users(id)     | User who made the sale.                        |
+| total_amount   | DECIMAL(10,2)          | Total sale amount.                             |
+| total_profit   | DECIMAL(10,2)          | Total **profit** generated in this sale.       |
+| payment_method | ENUM('cash', 'card', 'transfer') | Payment method used.                |
+| sale_date      | DATETIME               | Date and time of the sale.                     |
+
+---
+
+### 4. **sale_items** (Products sold in each sale)
+
+| Column         | Type                   | Description                                    |
+|:-------------- |:----------------------|:-----------------------------------------------|
+| id             | INT PK AUTO_INCREMENT  | Unique item ID.                                |
+| sale_id        | INT FK → sales(id)     | Sale to which it belongs.                      |
+| product_id     | INT FK → products(id)  | Product sold.                                  |
+| quantity       | DECIMAL(10,2)          | Quantity sold (pieces or kilos).               |
+| unit_price     | DECIMAL(10,2)          | Sale price at the time.                        |
+| purchase_price | DECIMAL(10,2)          | Purchase price at the time.                    |
+| subtotal       | DECIMAL(10,2)          | quantity * unit_price (before discounts, if any). |
+| profit         | DECIMAL(10,2)          | (unit_price - purchase_price) * quantity       |
