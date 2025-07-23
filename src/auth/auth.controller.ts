@@ -26,14 +26,10 @@ export class AuthController {
 
     const { token, user } = await this.authService.login(loginAuthDto);
 
-    res.cookie('jwt', token, {
-      httpOnly: true,
-      secure: false, // Cambiar a true en producción
-      sameSite: 'lax',
-      maxAge: 8 * 60 * 60 * 1000 // 8 horas
-    })
-
-    return user;
+    return {
+      user,
+      token
+    };
   }
 
   // ! Cerrar sesión

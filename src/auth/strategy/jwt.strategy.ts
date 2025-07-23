@@ -21,12 +21,7 @@ export class JwtStrategy extends PassportStrategy(Strategy){
         const jwtSecret = configService.get<any | undefined>('SECRETJWT_KEY');
 
         super({
-            jwtFromRequest: (req: Request) => {
-                if (req && req.cookies) {
-                  return req.cookies['jwt']; 
-                }
-                return null;
-              },
+            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             secretOrKey: jwtSecret
         })
     }

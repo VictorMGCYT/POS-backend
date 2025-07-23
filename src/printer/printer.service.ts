@@ -2,16 +2,15 @@ import { Injectable } from '@nestjs/common';
 const PdfPrinter = require('pdfmake');
 import { BufferOptions, CustomTableLayout, TDocumentDefinitions } from 'pdfmake/interfaces';
 
-
 // Fuentes para utilizar en el servicio de impresora:
 
 const fonts = {
-    Roboto: {
-        normal: 'fonts/Roboto-Regular.ttf',
-        bold: 'fonts/Roboto-Medium.ttf',
-        italics: 'fonts/Roboto-Italic.ttf',
-        bolditalics: 'fonts/Roboto-MediumItalic.ttf'
-    }
+  Roboto: {
+    normal: 'fonts/Roboto-Regular.ttf',
+    bold: 'fonts/Roboto-Medium.ttf',
+    italics: 'fonts/Roboto-Italic.ttf',
+    bolditalics: 'fonts/Roboto-MediumItalic.ttf'
+  }
 };
 
 // diseño personalizado de tabla para la impresora

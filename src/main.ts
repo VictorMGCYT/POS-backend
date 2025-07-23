@@ -26,7 +26,7 @@ async function bootstrap() {
 
   // TODO mejorar el uso de cors para mi dominio del front en especifico
   app.enableCors({
-    origin: 'http://localhost:5173', // ✅ tu frontend
+    origin: true, // ✅ tu frontend
     credentials: true,               // ✅ permitir cookies
   });
 
